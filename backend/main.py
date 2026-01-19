@@ -3,6 +3,7 @@ import sys
 from src.data_source import FileDataSource
 from src.generator import QuestionGenerator, chunk_text
 from src.mcq_engine import MCQEngine
+from difflib import SequenceMatcher
 import random
 
 def main():
@@ -53,10 +54,26 @@ def main():
                 print(f"- {q}")
         elif args.mode == 'mcq':
             # 1. Get Answers
-            answers = mcq_engine.get_candidate_answers(chunk, num_candidates=args.num_questions)
+            answers = mcq_engine.get_candidate_answers(chunk, num_candidates=args.num_questions * 3) # Get more candidates to filter
+            seen_questions = []
             for ans in answers:
+                if len(seen_questions) >= args.num_questions:
+                    break
                 # 2. Generate Question for Answer
                 question = generator.generate_for_answer(ans, chunk)
+                
+                # Deduplication check
+                is_duplicate = False
+                for existing_q in seen_questions:
+                    similarity = SequenceMatcher(None, question, existing_q).ratio()
+                    if similarity > 0.85: # Threshold for similarity
+                        is_duplicate = True
+                        break
+                
+                if is_duplicate:
+                    continue
+                    
+                seen_questions.append(question)
                 
                 # 3. Get Distractors
                 distractors = mcq_engine.get_distractors(ans, chunk)
