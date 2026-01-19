@@ -9,7 +9,7 @@ def main():
     parser = argparse.ArgumentParser(description="AI Question Generator from Book")
     parser.add_argument("input_file", help="Path to the book/text file")
     parser.add_argument("--num_questions", type=int, default=5, help="Number of questions to generate per chunk")
-    parser.add_argument("--mode", choices=['qa', 'mcq'], default='qa', help="Generation mode: 'qa' for open ended, 'mcq' for multiple choice")
+    parser.add_argument("--mode", choices=['qa', 'mcq'], default='mcq', help="Generation mode: 'qa' for open ended, 'mcq' for multiple choice")
     
     args = parser.parse_args()
     

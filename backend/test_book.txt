@@ -1,5 +1,13 @@
-Photosynthesis is a process used by plants and other organisms to convert light energy into chemical energy that, through cellular respiration, can later be released to fuel the organism's metabolic activities. This chemical energy is stored in carbohydrate molecules, such as sugars and starches, which are synthesized from carbon dioxide and water – hence the name photosynthesis, from the Greek phōs (light) and synthesis (putting together).
-
-Most plants, algae, and cyanobacteria perform photosynthesis; such organisms are called photoautotrophs. Photosynthesis is largely responsible for producing and maintaining the oxygen content of the Earth's atmosphere, and supplies most of the energy necessary for life on Earth.
-
-Although photosynthesis is performed differently by different species, the process always begins when energy from light is absorbed by proteins called reaction centers that contain green chlorophyll pigments. In plants, these proteins are held inside organelles called chloroplasts, which are most abundant in leaf cells, while in bacteria they are embedded in the plasma membrane. In these light-dependent reactions, some energy is used to strip electrons from suitable substances, such as water, producing oxygen gas. The hydrogen freed by the splitting of water is used in the creation of two further compounds that serve as short-term stores of energy, enabling its transfer to drive other reactions: these compounds are reduced nicotinamide adenine dinucleotide phosphate (NADPH) and adenosine triphosphate (ATP), the "energy currency" of cells.
+The Data Link Layer (DLL) is the second layer (Layer 2) of the OSI model, situated between the Physical and Network layers. It is responsible for reliable node-to-node delivery within the same local network. 
+Core Functions
+Framing: It divides packets from the Network layer into manageable units called frames. It adds headers (containing MAC addresses) and trailers (containing error-checking data) to define the beginning and end of each data unit.
+Physical Addressing: It manages unique hardware addresses (MAC addresses) to ensure data reaches the correct physical device on a link.
+Error Control: It detects and sometimes corrects errors that occur during physical transmission, typically using Cyclic Redundancy Check (CRC) in the frame trailer.
+Flow Control: It regulates the data transmission rate to prevent a fast sender from overwhelming a slow receiver.
+Access Control: It determines how multiple devices share a single physical communication medium to avoid collisions (e.g., CSMA/CD for Ethernet). 
+Sub-Layers
+The DLL is divided into two distinct sub-layers: 
+Logical Link Control (LLC): Manages flow control, error checking, and frame synchronization.
+Media Access Control (MAC): Controls how devices gain access to the physical media and handles physical addressing. 
+Key Details for 2026
+Common Protocols: Ethernet (IEEE 802.3), Wi-Fi (IEEE 802.11), Point-to-Point Protocol (PPP), and HDLC.
