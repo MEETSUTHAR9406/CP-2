@@ -1,3 +1,6 @@
+# =========================
+# Python / Backend
+# =========================
 __pycache__/
 *.py[cod]
 *$py.class
@@ -5,4 +8,29 @@ env/
 venv/
 .env
 .ipynb_checkpoints/
+
+# =========================
+# OS
+# =========================
 .DS_Store
+Thumbs.db
+
+# =========================
+# Node / Frontend
+# =========================
+node_modules/
+dist/
+build/
+
+# =========================
+# Logs
+# =========================
+npm-debug.log*
+yarn-debug.log*
+pnpm-debug.log*
+
+# =========================
+# IDE
+# =========================
+.vscode/
+.idea/
