@@ -37,6 +37,8 @@ body {
   color: hsl(var(--color-text-main));
   font-family: 'Inter', system-ui, -apple-system, sans-serif;
   -webkit-font-smoothing: antialiased;
+  overflow-wrap: break-word;
+  word-break: break-word;
 }
 
 @layer utilities {

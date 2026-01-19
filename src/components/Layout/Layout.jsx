@@ -34,7 +34,7 @@ const SidebarItem = ({ icon: Icon, label, path, isCollapsed, isActive }) => {
     >
       <Icon size={20} className={clsx("transition-colors", isActive ? "text-[hsl(var(--color-primary))]" : "text-gray-500 group-hover:text-gray-700")} />
       {!isCollapsed && (
-        <span className="font-medium text-sm whitespace-nowrap overflow-hidden">
+        <span className="font-medium text-sm">
           {label}
         </span>
       )}
@@ -82,12 +82,12 @@ const Layout = () => {
   };
 
   return (
-    <div className="flex h-screen bg-[hsl(var(--color-bg))] overflow-hidden">
+    <div className="flex bg-[hsl(var(--color-bg))] min-h-screen relative">
       
       {/* Desktop Sidebar */}
       <motion.aside 
         animate={{ width: isCollapsed ? 72 : 260 }}
-        className="hidden md:flex flex-col bg-white border-r border-[hsl(var(--color-border))] h-full z-20 shadow-sm relative transition-all duration-300 ease-in-out"
+        className="hidden md:flex flex-col bg-white border-r border-[hsl(var(--color-border))] h-screen sticky top-0 z-20 shadow-sm transition-all duration-300 ease-in-out shrink-0"
       >
         {/* Header */}
         <div className="h-16 flex items-center px-4 border-b border-[hsl(var(--color-border))] justify-between">
@@ -208,19 +208,19 @@ const Layout = () => {
       </AnimatePresence>
 
       {/* Main Content Area */}
-      <div className="flex-1 flex flex-col h-full relative">
+      <div className="flex-1 flex flex-col min-w-0">
         {/* Mobile Header */}
-        <div className="md:hidden flex items-center justify-between px-4 py-3 bg-white border-b border-[hsl(var(--color-border))] z-30">
-          <div className="flex items-center gap-2">
-             <span className="font-bold text-lg text-[hsl(var(--color-primary))]">QueryQuill</span>
+        <div className="md:hidden sticky top-0 flex items-center justify-between px-4 py-3 bg-[hsl(var(--color-surface))] border-b border-[hsl(var(--color-border))] z-30 w-full">
+          <div className="flex items-center gap-2 min-w-0">
+             <span className="font-bold text-lg text-[hsl(var(--color-primary))] truncate">QueryQuill</span>
           </div>
-          <button onClick={() => setIsMobileMenuOpen(true)}>
-            <Menu size={24} className="text-gray-600" />
+          <button onClick={() => setIsMobileMenuOpen(true)} className="p-1 -mr-1 text-gray-600 hover:bg-gray-100 rounded-md shrink-0">
+            <Menu size={24} />
           </button>
         </div>
 
-        {/* Scrollable Content */}
-        <main className="flex-1 overflow-y-auto p-4 md:p-8 scroll-smooth">
+        {/* Content */}
+        <main className="flex-1 p-4 md:p-8">
           <div className="max-w-6xl mx-auto w-full">
             <Outlet />
           </div>

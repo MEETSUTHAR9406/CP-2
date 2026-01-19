@@ -22,8 +22,8 @@ const StatCard = ({ title, value, subtitle, icon: Icon, color, delay }) => (
         <div className={`inline-flex p-2 rounded-lg mb-4 ${color.bg} ${color.text} bg-opacity-20`}>
           <Icon size={22} />
         </div>
-        <h3 className="text-gray-500 text-sm font-medium mb-1">{title}</h3>
-        <div className="text-3xl font-bold text-gray-900">{value}</div>
+        <h3 className="text-gray-500 text-sm font-medium mb-1 break-words">{title}</h3>
+        <div className="text-3xl font-bold text-gray-900 break-words">{value}</div>
       </div>
       {subtitle && (
         <div className="mt-2 flex items-center text-xs text-gray-400 font-medium">
@@ -41,19 +41,19 @@ const StudentDashboard = () => {
   return (
     <div className="space-y-8">
       {/* Welcome Section */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900">Hello, {user?.name?.split(' ')[0] || 'Student'}! 👋</h1>
-          <p className="text-gray-500 mt-1">Ready to learn something new today?</p>
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 flex-wrap">
+        <div className="w-full md:w-auto min-w-0">
+          <h1 className="text-3xl font-bold text-gray-900 break-words">Hello, {user?.name?.split(' ')[0] || 'Student'}! 👋</h1>
+          <p className="text-gray-500 mt-1 break-words">Ready to learn something new today?</p>
         </div>
-        <div className="flex gap-3">
-           <Link to="/student/summarizer">
-             <Button variant="outline" size="sm">
+        <div className="flex gap-3 w-full md:w-auto flex-wrap">
+           <Link to="/student/summarizer" className="flex-1 sm:flex-none">
+             <Button variant="outline" size="sm" className="w-full justify-center">
                <BookOpen size={16} className="mr-2" /> Quick Summary
              </Button>
            </Link>
-           <Link to="/student/mcq">
-             <Button size="sm">
+           <Link to="/student/mcq" className="flex-1 sm:flex-none">
+             <Button size="sm" className="w-full justify-center">
                <Target size={16} className="mr-2" /> Start Practice
              </Button>
            </Link>
@@ -100,7 +100,7 @@ const StudentDashboard = () => {
         
         {/* Recent Activity / Recommendations (Main Column) */}
         <div className="lg:col-span-2 space-y-6">
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between flex-wrap gap-2">
             <h2 className="text-xl font-bold text-gray-900">Continue Learning</h2>
             <Link to="/student/mcq" className="text-sm text-[hsl(var(--color-primary))] font-medium hover:underline flex items-center">
               View All <ArrowUpRight size={16} className="ml-1" />

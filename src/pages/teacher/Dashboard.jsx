@@ -13,14 +13,14 @@ const TeacherDashboard = () => {
     <div className="space-y-8">
       
       {/* Welcome Section (Matching Student Style) */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-        <div>
-           <h1 className="text-3xl font-bold text-gray-900">Welcome, {user?.name?.split(' ')[0] || 'Teacher'}! 👨‍🏫</h1>
-           <p className="text-gray-500 mt-1">Manage your classroom, create content, and track progress.</p>
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 flex-wrap">
+        <div className="w-full md:w-auto min-w-0">
+           <h1 className="text-3xl font-bold text-gray-900 break-words">Welcome, {user?.name?.split(' ')[0] || 'Teacher'}! 👨‍🏫</h1>
+           <p className="text-gray-500 mt-1 break-words">Manage your classroom, create content, and track progress.</p>
         </div>
-        <div className="flex gap-3">
-          <Link to="/teacher/exam-generator">
-            <Button className="pl-4 pr-6 shadow-lg shadow-indigo-100">
+        <div className="flex gap-3 w-full md:w-auto flex-wrap">
+          <Link to="/teacher/exam-generator" className="w-full sm:w-auto">
+            <Button className="pl-4 pr-6 shadow-lg shadow-indigo-100 w-full sm:w-auto justify-center">
                <Plus size={20} className="mr-2" /> New Exam
             </Button>
           </Link>
@@ -31,8 +31,8 @@ const TeacherDashboard = () => {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <Card className="p-6 border-none shadow-sm hover:translate-y-1 transition-all">
            <div className="flex items-center gap-4 mb-2">
-             <div className="p-2 bg-indigo-100 text-indigo-600 rounded-lg"><Users size={24} /></div>
-             <span className="text-sm font-bold text-gray-500">Total Students</span>
+             <div className="p-2 bg-indigo-100 text-indigo-600 rounded-lg flex-shrink-0"><Users size={24} /></div>
+             <span className="text-sm font-bold text-gray-500 break-words">Total Students</span>
            </div>
            <div className="text-3xl font-bold text-gray-900">48</div>
            <div className="text-xs text-green-600 font-bold mt-1">+12% from last month</div>
@@ -40,8 +40,8 @@ const TeacherDashboard = () => {
 
         <Card className="p-6 border-none shadow-sm hover:translate-y-1 transition-all">
            <div className="flex items-center gap-4 mb-2">
-             <div className="p-2 bg-teal-100 text-teal-600 rounded-lg"><FileText size={24} /></div>
-             <span className="text-sm font-bold text-gray-500">Active Exams</span>
+             <div className="p-2 bg-teal-100 text-teal-600 rounded-lg flex-shrink-0"><FileText size={24} /></div>
+             <span className="text-sm font-bold text-gray-500 break-words">Active Exams</span>
            </div>
            <div className="text-3xl font-bold text-gray-900">3</div>
            <div className="text-xs text-gray-400 mt-1">Next due: Friday</div>
@@ -49,8 +49,8 @@ const TeacherDashboard = () => {
 
         <Card className="p-6 border-none shadow-sm hover:translate-y-1 transition-all">
            <div className="flex items-center gap-4 mb-2">
-             <div className="p-2 bg-amber-100 text-amber-600 rounded-lg"><TrendingUp size={24} /></div>
-             <span className="text-sm font-bold text-gray-500">Avg. Score</span>
+             <div className="p-2 bg-amber-100 text-amber-600 rounded-lg flex-shrink-0"><TrendingUp size={24} /></div>
+             <span className="text-sm font-bold text-gray-500 break-words">Avg. Score</span>
            </div>
            <div className="text-3xl font-bold text-gray-900">85%</div>
            <div className="text-xs text-green-600 font-bold mt-1">Top 5% of region</div>
@@ -58,8 +58,8 @@ const TeacherDashboard = () => {
 
         <Card className="p-6 border-none shadow-sm hover:translate-y-1 transition-all">
            <div className="flex items-center gap-4 mb-2">
-             <div className="p-2 bg-purple-100 text-purple-600 rounded-lg"><Presentation size={24} /></div>
-             <span className="text-sm font-bold text-gray-500">Slides Created</span>
+             <div className="p-2 bg-purple-100 text-purple-600 rounded-lg flex-shrink-0"><Presentation size={24} /></div>
+             <span className="text-sm font-bold text-gray-500 break-words">Slides Created</span>
            </div>
            <div className="text-3xl font-bold text-gray-900">14</div>
            <div className="text-xs text-gray-400 mt-1">Last: React Hooks</div>
@@ -105,10 +105,10 @@ const TeacherDashboard = () => {
 
       {/* Recent Activity Table (Same as before) */}
       <Card className="overflow-hidden border-gray-200 shadow-sm">
-        <div className="p-6 border-b border-gray-100 flex flex-col md:flex-row justify-between items-center gap-4">
-          <div className="flex items-center gap-2">
-             <LayoutDashboard size={20} className="text-gray-400" />
-             <h2 className="text-lg font-bold text-gray-900">Recent Exam Papers</h2>
+        <div className="p-6 border-b border-gray-100 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 flex-wrap">
+          <div className="flex items-center gap-2 min-w-0 max-w-full">
+             <LayoutDashboard size={20} className="text-gray-400 flex-shrink-0" />
+             <h2 className="text-lg font-bold text-gray-900 break-words truncate">Recent Exam Papers</h2>
           </div>
           <div className="relative w-full md:w-64">
             <Search size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
