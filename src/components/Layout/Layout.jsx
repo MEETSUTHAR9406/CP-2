@@ -64,6 +64,12 @@ const Layout = () => {
 
   const teacherLinks = [
     { icon: LayoutDashboard, label: 'Dashboard', path: '/teacher/dashboard' },
+    // Include all student features for teachers
+    { icon: FileText, label: 'Summarizer', path: '/student/summarizer' },
+    { icon: Layers, label: 'Flashcards', path: '/student/flashcards' },
+    { icon: CheckSquare, label: 'MCQ Practice', path: '/student/mcq' },
+    { icon: PenTool, label: 'Exam Attempt', path: '/student/exam' },
+    // Exclusive teacher features
     { icon: Presentation, label: 'Slide Generator', path: '/teacher/slides' },
     { icon: PenTool, label: 'Exam Creator', path: '/teacher/exam-generator' },
   ];
@@ -85,10 +91,10 @@ const Layout = () => {
       >
         {/* Header */}
         <div className="h-16 flex items-center px-4 border-b border-[hsl(var(--color-border))] justify-between">
-          <div className="flex items-center gap-3 overflow-hidden">
-             <img src="/logo.png" alt="Logo" className="w-8 h-8 flex-shrink-0" />
+          <div className="flex items-center gap-3">
+             {/* Logo Removed */}
              {!isCollapsed && (
-               <span className="font-bold text-xl tracking-tight text-[hsl(var(--color-text-main))]">
+               <span className="font-bold text-xl tracking-tight text-[hsl(var(--color-text-main))] whitespace-nowrap">
                  QueryQuill
                </span>
              )}
@@ -165,7 +171,6 @@ const Layout = () => {
             >
               <div className="h-16 flex items-center justify-between px-4 border-b border-[hsl(var(--color-border))]">
                 <div className="flex items-center gap-2">
-                  <img src="/logo.png" alt="Logo" className="w-8 h-8" />
                   <span className="font-bold text-lg">QueryQuill</span>
                 </div>
                 <button onClick={() => setIsMobileMenuOpen(false)} className="p-1 rounded-md hover:bg-gray-100">
@@ -207,7 +212,6 @@ const Layout = () => {
         {/* Mobile Header */}
         <div className="md:hidden flex items-center justify-between px-4 py-3 bg-white border-b border-[hsl(var(--color-border))] z-30">
           <div className="flex items-center gap-2">
-             <img src="/logo.png" alt="Logo" className="w-8 h-8" />
              <span className="font-bold text-lg text-[hsl(var(--color-primary))]">QueryQuill</span>
           </div>
           <button onClick={() => setIsMobileMenuOpen(true)}>

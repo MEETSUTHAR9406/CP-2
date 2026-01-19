@@ -61,7 +61,7 @@ const StudentDashboard = () => {
       </div>
 
       {/* Stats Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
         <StatCard 
           title="Daily Streak" 
           value={`${stats?.streak || 0}`}
@@ -108,24 +108,24 @@ const StudentDashboard = () => {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <Card className="hover:border-[hsl(var(--color-primary))] cursor-pointer transition-colors group">
-               <div className="h-32 bg-gradient-to-br from-indigo-50 to-blue-50 rounded-lg mb-4 flex items-center justify-center">
-                  <BookOpen size={40} className="text-indigo-200 group-hover:text-indigo-400 transition-colors" />
+            <Card className="hover:border-[hsl(var(--color-primary))] cursor-pointer transition-colors group text-center p-6">
+               <div className="h-24 bg-gradient-to-br from-indigo-50 to-blue-50 rounded-lg mb-4 flex items-center justify-center mx-auto w-24">
+                  <BookOpen size={32} className="text-indigo-400 group-hover:text-indigo-600 transition-colors" />
                </div>
-               <h3 className="font-bold text-lg mb-1">React Fundamentals</h3>
-               <p className="text-sm text-gray-500 mb-3">Chapter 3 • Components & Props</p>
-               <div className="w-full bg-gray-100 h-1.5 rounded-full overflow-hidden">
+               <h3 className="font-bold text-lg mb-1 text-gray-900">React Fundamentals</h3>
+               <p className="text-sm text-gray-600 mb-4 font-medium">Chapter 3 • Components & Props</p>
+               <div className="w-full bg-gray-100 h-2 rounded-full overflow-hidden">
                  <div className="bg-indigo-500 w-3/4 h-full" />
                </div>
             </Card>
 
-            <Card className="hover:border-[hsl(var(--color-primary))] cursor-pointer transition-colors group">
-               <div className="h-32 bg-gradient-to-br from-emerald-50 to-teal-50 rounded-lg mb-4 flex items-center justify-center">
-                  <Target size={40} className="text-emerald-200 group-hover:text-emerald-400 transition-colors" />
+            <Card className="hover:border-[hsl(var(--color-primary))] cursor-pointer transition-colors group text-center p-6">
+               <div className="h-24 bg-gradient-to-br from-emerald-50 to-teal-50 rounded-lg mb-4 flex items-center justify-center mx-auto w-24">
+                  <Target size={32} className="text-emerald-400 group-hover:text-emerald-600 transition-colors" />
                </div>
-               <h3 className="font-bold text-lg mb-1">Weekly Quiz</h3>
-               <p className="text-sm text-gray-500 mb-3">Due Tomorrow • 15 Questions</p>
-               <Button size="sm" variant="outline" className="w-full">Resume Quiz</Button>
+               <h3 className="font-bold text-lg mb-1 text-gray-900">Weekly Quiz</h3>
+               <p className="text-sm text-gray-600 mb-4 font-medium">Due Tomorrow • 15 Questions</p>
+               <Button size="sm" variant="outline" className="w-full border-2 hover:bg-emerald-50 hover:text-emerald-700 hover:border-emerald-200">Resume Quiz</Button>
             </Card>
           </div>
         </div>

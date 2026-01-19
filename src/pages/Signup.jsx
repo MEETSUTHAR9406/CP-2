@@ -35,6 +35,13 @@ const Signup = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setErrors({});
+    
+    // Name Validation (Letters only)
+    if (!/^[a-zA-Z\s]+$/.test(formData.name)) {
+      setErrors({ form: "Name must contain only letters." });
+      return;
+    }
+
     if (formData.password.length < 6) {
       setErrors({ password: "Password must be at least 6 characters" });
       return;
@@ -59,7 +66,7 @@ const Signup = () => {
         className="w-full max-w-md"
       >
         <div className="text-center mb-8">
-          <img src="/logo.png" alt="QueryQuill" className="w-12 h-12 mx-auto mb-4 object-contain" />
+          <h2 className="text-4xl font-extrabold text-[hsl(var(--color-primary))] tracking-tighter mb-6">QueryQuill</h2>
           <h1 className="text-3xl font-bold text-gray-900 tracking-tight">Create Account</h1>
           <p className="text-gray-500 mt-2">Join thousands of learners today</p>
         </div>
@@ -145,6 +152,11 @@ const Signup = () => {
             )}
 
             <div className="pt-2">
+              {errors.form && (
+                <div className="mb-4 p-3 bg-red-50 text-red-600 text-sm rounded-lg flex items-center gap-2">
+                  <X size={16} /> {errors.form}
+                </div>
+              )}
               <Button loading={loading} className="w-full justify-center text-base py-2.5">
                 Create Account
               </Button>

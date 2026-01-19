@@ -17,11 +17,21 @@ export const AuthProvider = ({ children }) => {
     setLoading(false);
   }, []);
 
-  const login = (email, role) => {
-    const newUser = { email, role, name: email.split('@')[0] };
-    setUser(newUser);
-    localStorage.setItem('mock_user', JSON.stringify(newUser));
-    return true;
+  const login = (email, password) => {
+    // Mock login logic with specific credentials
+    if ((email === 'student@test.com' && password === 'password') || 
+        (email === 'teacher@test.com' && password === 'password')) {
+      const role = email.includes('teacher') ? 'teacher' : 'student';
+      const newUser = { 
+        name: role === 'teacher' ? 'Teacher User' : 'Student User', 
+        email, 
+        role 
+      };
+      setUser(newUser);
+      localStorage.setItem('user', JSON.stringify(newUser));
+      return;
+    }
+    throw new Error('Invalid credentials');
   };
 
   const signup = (details) => {

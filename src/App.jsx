@@ -43,14 +43,18 @@ function App() {
             
             <Route path="/" element={<Navigate to="/login" replace />} />
 
+            {/* Shared Authenticated Routes */}
+            <Route element={<PrivateRoute allowedRoles={['student', 'teacher']}><Layout /></PrivateRoute>}>
+               <Route path="/profile" element={<Profile />} />
+               <Route path="/student/summarizer" element={<Summarizer />} />
+               <Route path="/student/flashcards" element={<Flashcards />} />
+               <Route path="/student/mcq" element={<MCQPractice />} />
+               <Route path="/student/exam" element={<ExamAttempt />} />
+            </Route>
+
             {/* Student Routes */}
             <Route element={<PrivateRoute allowedRoles={['student']}><Layout /></PrivateRoute>}>
               <Route path="/student/dashboard" element={<StudentDashboard />} />
-              <Route path="/student/summarizer" element={<Summarizer />} />
-              <Route path="/student/flashcards" element={<Flashcards />} />
-              <Route path="/student/mcq" element={<MCQPractice />} />
-              <Route path="/student/exam" element={<ExamAttempt />} />
-              <Route path="/profile" element={<Profile />} />
             </Route>
 
             {/* Teacher Routes */}
@@ -58,7 +62,6 @@ function App() {
               <Route path="/teacher/dashboard" element={<TeacherDashboard />} />
               <Route path="/teacher/slides" element={<SlidesGenerator />} />
               <Route path="/teacher/exam-generator" element={<ExamGenerator />} />
-              <Route path="/profile" element={<Profile />} />
             </Route>
           </Routes>
         </Router>

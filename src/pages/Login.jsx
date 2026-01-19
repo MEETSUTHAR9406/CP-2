@@ -39,9 +39,14 @@ const Login = () => {
         className="w-full max-w-md"
       >
         <div className="text-center mb-8">
-           <img src="/logo.png" alt="QueryQuill" className="w-16 h-16 mx-auto mb-4 object-contain" />
+           <h2 className="text-4xl font-extrabold text-[hsl(var(--color-primary))] tracking-tighter mb-6">QueryQuill</h2>
            <h1 className="text-3xl font-bold text-gray-900 tracking-tight">Welcome back</h1>
            <p className="text-gray-500 mt-2">Continue your learning journey</p>
+           <div className="mt-4 p-3 bg-blue-50 text-blue-700 text-xs rounded-lg inline-block text-left">
+             <p className="font-bold mb-1">Test Credentials:</p>
+             <p>Student: student@test.com / password</p>
+             <p>Teacher: teacher@test.com / password</p>
+           </div>
         </div>
 
         <Card className="p-8 shadow-xl shadow-indigo-100/50 border-gray-100">

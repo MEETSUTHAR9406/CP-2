@@ -57,7 +57,7 @@ const Flashcards = () => {
           onClick={() => setIsFlipped(!isFlipped)}
         >
           {/* Front Face */}
-          <div className="absolute inset-0 backface-hidden">
+          <div className="absolute inset-0" style={{ backfaceVisibility: 'hidden' }}>
             <Card className="w-full h-full flex flex-col items-center justify-center p-8 bg-white border-b-4 border-b-[hsl(var(--color-primary))] shadow-xl hover:shadow-2xl transition-shadow rounded-2xl">
               <span className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-4">Question</span>
               <h3 className="text-2xl font-bold text-center text-gray-800 leading-relaxed">
@@ -71,8 +71,8 @@ const Flashcards = () => {
 
           {/* Back Face */}
           <div 
-            className="absolute inset-0 backface-hidden"
-            style={{ transform: 'rotateY(180deg)' }}
+            className="absolute inset-0"
+            style={{ transform: 'rotateY(180deg)', backfaceVisibility: 'hidden' }}
           >
             <Card className="w-full h-full flex flex-col items-center justify-center p-8 bg-[hsl(var(--color-bg))] border-b-4 border-b-[hsl(var(--color-secondary))] shadow-xl rounded-2xl">
               <span className="text-xs font-bold text-[hsl(var(--color-secondary))] uppercase tracking-widest mb-4">Answer</span>
