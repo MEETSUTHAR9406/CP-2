@@ -1,36 +1,38 @@
-# =========================
-# Python / Backend
-# =========================
-__pycache__/
-*.py[cod]
-*$py.class
-env/
-venv/
-.env
-.ipynb_checkpoints/
+# ========================= 
+# Python / Backend 
+# ========================= 
+__pycache__/ 
+*.py[cod] 
+*$py.class 
+env/ 
+venv/ 
+.env 
+.ipynb_checkpoints/ 
 
-# =========================
-# OS
-# =========================
-.DS_Store
-Thumbs.db
+# ========================= 
+# OS 
+# ========================= 
+.DS_Store 
+Thumbs.db 
 
-# =========================
-# Node / Frontend
-# =========================
-node_modules/
-dist/
-build/
+# ========================= 
+# Node / Frontend 
+# ========================= 
+node_modules/ 
+frontend/node_modules/ 
+dist/ 
+build/ 
+.vite/ 
 
-# =========================
-# Logs
-# =========================
-npm-debug.log*
-yarn-debug.log*
-pnpm-debug.log*
+# ========================= 
+# Logs 
+# ========================= 
+npm-debug.log* 
+yarn-debug.log* 
+pnpm-debug.log* 
 
-# =========================
-# IDE
-# =========================
-.vscode/
+# ========================= 
+# IDE 
+# ========================= 
+.vscode/ 
 .idea/
