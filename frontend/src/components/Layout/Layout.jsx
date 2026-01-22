@@ -20,11 +20,13 @@ import { motion, AnimatePresence } from 'framer-motion';
 import clsx from 'clsx';
 import Button from '../UI/Button';
 
-const SidebarItem = ({ icon: Icon, label, path, isCollapsed, isActive }) => {
+const SidebarItem = ({ icon: Icon, label, path, isCollapsed, isActive, onClick }) => {
   return (
     <Link 
       to={path}
+      onClick={onClick}
       title={isCollapsed ? label : ''}
+
       className={clsx(
         "flex items-center gap-3 px-3 py-2.5 rounded-lg mb-1 transition-all duration-200 group relative",
         isActive 
@@ -185,6 +187,7 @@ const Layout = () => {
                     {...link}
                     isCollapsed={false}
                     isActive={location.pathname === link.path}
+                    onClick={() => setIsMobileMenuOpen(false)}
                   />
                 ))}
                  <div className="my-4 border-t border-gray-100" />
@@ -194,6 +197,7 @@ const Layout = () => {
                    path="/profile" 
                    isCollapsed={false}
                    isActive={location.pathname === '/profile'}
+                   onClick={() => setIsMobileMenuOpen(false)}
                  />
               </div>
 
