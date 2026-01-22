@@ -89,5 +89,5 @@ def main():
             
     print("\nDone! Generated valid questions based on the text.")
 
-if __name__ == "__main__":
+if __name__ == "__main__":    
     main()
