@@ -1,7 +1,8 @@
-from fastapi import FastAPI, UploadFile, File, Form, HTTPException
+from fastapi import FastAPI, UploadFile, File, Form, HTTPException, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from typing import List, Optional
+from sqlalchemy.orm import Session
 import shutil
 import os
 import tempfile
@@ -12,6 +13,17 @@ from difflib import SequenceMatcher
 import random
 import io
 import pypdf
+import models
+from database import engine, SessionLocal
+
+models.Base.metadata.create_all(bind=engine)
+
+def get_db():
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
 
 app = FastAPI()
 
@@ -31,7 +43,7 @@ summarizer_model = None
 
 @app.on_event("startup")
 async def startup_event():
-    global generator, mcq_engine
+    global generator, mcq_engine, summarizer_model
     print("Loading models...")
     try:
         generator = QuestionGenerator()
@@ -46,6 +58,7 @@ async def generate_questions(
     file: UploadFile = File(...),
     num_questions: int = Form(5),
     mode: str = Form('mcq'),
+    db: Session = Depends(get_db)
 ):
     if not generator or not mcq_engine:
          raise HTTPException(status_code=503, detail="Models are not loaded yet.")
@@ -93,6 +106,13 @@ async def generate_questions(
             questions = generator.generate(chunk, num_questions=num_questions)
             for q in questions:
                 results.append({"type": "qa", "question": q, "context": chunk})
+                # Save to DB
+                db_question = models.Question(
+                    text=q,
+                    type="qa",
+                    context=chunk
+                )
+                db.add(db_question)
         elif mode == 'mcq':
             answers = mcq_engine.get_candidate_answers(chunk, num_candidates=num_questions * 3)
             seen_questions = []
@@ -127,6 +147,17 @@ async def generate_questions(
                     "context": chunk
                 })
 
+                # Save to DB
+                db_question = models.Question(
+                    text=question,
+                    type="mcq",
+                    options=options,
+                    answer=ans,
+                    context=chunk
+                )
+                db.add(db_question)
+
+    db.commit()
     return {"results": results}
 
 @app.post("/api/summarize")
