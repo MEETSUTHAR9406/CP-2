@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { generateQuestions } from '../../services/api';
 import Button from '../../components/UI/Button';
 import Card from '../../components/UI/Card';
 import { UploadCloud, Edit2, RefreshCw, Trash2, CheckCircle, Save, ArrowRight, Layout, Type } from 'lucide-react';
@@ -18,12 +19,8 @@ const QUESTION_TYPES = [
   { id: 'long', label: 'Long Answer', icon: File },
 ];
 
-const MOCKED_QUESTIONS = [
-  { id: 1, type: 'mcq', question: "What is the time complexity of Binary Search?", options: ["O(n)", "O(log n)", "O(1)", "O(n^2)"], correct: 1 },
-  { id: 2, type: 'short', question: "Define 'Recursion' in one sentence." },
-  { id: 3, type: 'long', question: "Explain the full lifecycle of a React Component with examples." },
-  { id: 4, type: 'mcq', question: "Which data structure uses LIFO principle?", options: ["Queue", "Stack", "Array", "Tree"], correct: 1 },
-];
+// Mock data removed
+
 
 const ExamGenerator = () => {
   const [step, setStep] = useState(1); // 1: Setup, 2: Editor, 3: Preview/Publish
@@ -40,11 +37,47 @@ const ExamGenerator = () => {
   const [editValue, setEditValue] = useState('');
 
   const handleGenerate = async () => {
+    if (!file) {
+      alert("Please upload a file");
+      return;
+    }
+
     setLoading(true);
-    await new Promise(r => setTimeout(r, 1500));
-    setQuestions(MOCKED_QUESTIONS);
-    setLoading(false);
-    setStep(2);
+    try {
+      // Determine mode based on selection. Priority: MCQ > Short Answer (QA)
+      // Future improvement: Support mixed modes by making parallel requests
+      const mode = config.types.mcq ? 'mcq' : 'qa';
+
+      const data = await generateQuestions(file, config.count, mode);
+      console.log("API Response Data:", data);
+
+      const formattedQuestions = data.results.map((item, index) => {
+        const baseQuestion = {
+          id: index + 1,
+          question: item.question,
+          type: item.type === 'mcq' ? 'mcq' : 'short', // Mapping 'qa' to 'short'
+        };
+
+        if (item.type === 'mcq') {
+          return {
+            ...baseQuestion,
+            options: item.options,
+            correct: item.options.indexOf(item.answer), // Frontend expects index
+            answerText: item.answer // Store text just in case
+          };
+        }
+
+        return baseQuestion;
+      });
+
+      setQuestions(formattedQuestions);
+      setStep(2);
+    } catch (error) {
+      console.error("Generation failed:", error);
+      alert("Failed to generate questions: " + error.message);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleTypeToggle = (typeId) => {
@@ -69,9 +102,9 @@ const ExamGenerator = () => {
     setTimeout(() => {
       const generatedId = `EX-${Math.floor(1000 + Math.random() * 9000)}-2026`;
       localStorage.setItem('qq_published_exam', JSON.stringify({
-         id: generatedId,
-         questions,
-         title: 'Generated Exam'
+        id: generatedId,
+        questions,
+        title: 'Generated Exam'
       }));
       setExamId(generatedId);
       setLoading(false);
@@ -98,12 +131,12 @@ const ExamGenerator = () => {
             <label className="text-sm font-bold text-gray-700 uppercase tracking-wide">1. Source Material</label>
             <div className="border-2 border-dashed border-gray-200 rounded-xl p-10 text-center cursor-pointer hover:bg-gray-50 hover:border-[hsl(var(--color-primary))] transition-all relative group bg-gray-50/50">
               <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center mx-auto mb-4 shadow-sm group-hover:scale-110 transition-transform text-[hsl(var(--color-primary))]">
-                 <UploadCloud size={32} />
+                <UploadCloud size={32} />
               </div>
               {file ? (
                 <div className="animate-fade-in">
-                   <span className="text-[hsl(var(--color-primary))] font-bold text-lg">{file.name}</span>
-                   <p className="text-xs text-gray-400 mt-1">Ready for analysis</p>
+                  <span className="text-[hsl(var(--color-primary))] font-bold text-lg">{file.name}</span>
+                  <p className="text-xs text-gray-400 mt-1">Ready for analysis</p>
                 </div>
               ) : (
                 <>
@@ -126,7 +159,7 @@ const ExamGenerator = () => {
                     onClick={() => setConfig({ ...config, difficulty: level.id })}
                     className={clsx(
                       "px-4 py-3 rounded-xl font-bold text-sm transition-all border-2",
-                      config.difficulty === level.id 
+                      config.difficulty === level.id
                         ? `${level.color} shadow-sm transform scale-105`
                         : "bg-white text-gray-500 border-gray-100 hover:border-gray-300"
                     )}
@@ -146,8 +179,8 @@ const ExamGenerator = () => {
                     "flex items-center p-3 rounded-xl border-2 cursor-pointer transition-all",
                     config.types[type.id] ? "border-[hsl(var(--color-primary))] bg-indigo-50" : "border-gray-100 hover:bg-gray-50"
                   )}>
-                    <input 
-                      type="checkbox" 
+                    <input
+                      type="checkbox"
                       checked={config.types[type.id]}
                       onChange={() => handleTypeToggle(type.id)}
                       className="w-5 h-5 rounded text-[hsl(var(--color-primary))] border-gray-300 focus:ring-0"
@@ -192,18 +225,18 @@ const ExamGenerator = () => {
 
         <div className="space-y-5">
           {questions.map((q, idx) => (
-            <motion.div 
-               initial={{ opacity: 0, y: 10 }}
-               animate={{ opacity: 1, y: 0 }}
-               transition={{ delay: idx * 0.05 }}
-               key={q.id}
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: idx * 0.05 }}
+              key={q.id}
             >
               <Card className="p-6 group hover:shadow-md transition-shadow border-gray-200">
                 <div className="flex items-start gap-5">
                   <div className="w-8 h-8 rounded-lg bg-gray-100 flex items-center justify-center font-bold text-gray-500 text-sm flex-shrink-0 mt-1">
                     {idx + 1}
                   </div>
-                  
+
                   <div className="flex-1">
                     {editingId === q.id ? (
                       <div className="flex gap-3 items-start animate-fade-in">
@@ -221,7 +254,7 @@ const ExamGenerator = () => {
                     ) : (
                       <>
                         <div className="font-medium text-lg text-gray-900 mb-3 leading-relaxed">{q.question}</div>
-                        
+
                         <div className="flex items-center justify-between">
                           <div className="flex gap-2 text-xs text-gray-500 uppercase tracking-wide font-bold">
                             <span className="bg-gray-100 px-3 py-1 rounded-md">{q.type}</span>
@@ -230,12 +263,12 @@ const ExamGenerator = () => {
 
                           {/* Hover Actions */}
                           <div className="flex gap-4 opacity-0 group-hover:opacity-100 transition-opacity translate-x-4 group-hover:translate-x-0 duration-200">
-                             <button onClick={() => startEdit(q)} className="flex items-center text-xs font-bold text-indigo-600 hover:underline">
-                               <Edit2 size={14} className="mr-1" /> Edit
-                             </button>
-                             <button onClick={() => deleteQuestion(q.id)} className="flex items-center text-xs font-bold text-red-500 hover:underline">
-                               <Trash2 size={14} className="mr-1" /> Remove
-                             </button>
+                            <button onClick={() => startEdit(q)} className="flex items-center text-xs font-bold text-indigo-600 hover:underline">
+                              <Edit2 size={14} className="mr-1" /> Edit
+                            </button>
+                            <button onClick={() => deleteQuestion(q.id)} className="flex items-center text-xs font-bold text-red-500 hover:underline">
+                              <Trash2 size={14} className="mr-1" /> Remove
+                            </button>
                           </div>
                         </div>
                       </>
@@ -245,7 +278,7 @@ const ExamGenerator = () => {
               </Card>
             </motion.div>
           ))}
-          
+
           <button className="w-full py-5 border-2 border-dashed border-gray-200 rounded-xl text-gray-400 font-bold hover:border-[hsl(var(--color-primary))] hover:text-[hsl(var(--color-primary))] hover:bg-white transition-all flex items-center justify-center gap-2 group">
             <RefreshCw size={20} className="group-hover:rotate-180 transition-transform duration-500" />
             Generate More Questions
@@ -265,7 +298,7 @@ const ExamGenerator = () => {
           </div>
           <h2 className="text-4xl font-bold text-gray-900 mb-4">Exam Published!</h2>
           <p className="text-gray-500 mb-10 text-lg">Your exam is live. Share the ID below with your students.</p>
-          
+
           <div className="bg-gray-900 text-white p-8 rounded-2xl mb-10 flex flex-col items-center relative overflow-hidden group">
             <div className="absolute inset-0 bg-gradient-to-r from-indigo-900 to-purple-900 opacity-50" />
             <span className="text-gray-400 text-sm uppercase tracking-[0.2em] mb-3 font-bold relative z-10">Exam ID</span>
@@ -277,7 +310,7 @@ const ExamGenerator = () => {
               Create Another
             </Button>
             <Button onClick={() => window.print()} className="shadow-lg shadow-indigo-200">
-               Download PDF
+              Download PDF
             </Button>
           </div>
         </Card>
