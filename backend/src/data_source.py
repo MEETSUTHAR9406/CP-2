@@ -15,6 +15,17 @@ class FileDataSource(DataSource):
         if not os.path.exists(self.file_path):
             raise FileNotFoundError(f"File not found: {self.file_path}")
         
+        if self.file_path.lower().endswith('.pdf'):
+            try:
+                from pypdf import PdfReader
+                reader = PdfReader(self.file_path)
+                text = ""
+                for page in reader.pages:
+                    text += page.extract_text() + "\n"
+                return text
+            except ImportError:
+                raise ImportError("pypdf is required to read PDF files. Please install it.")
+        
         with open(self.file_path, 'r', encoding='utf-8') as f:
             return f.read()
 

@@ -41,10 +41,33 @@ const ExamGenerator = () => {
 
   const handleGenerate = async () => {
     setLoading(true);
-    await new Promise(r => setTimeout(r, 1500));
-    setQuestions(MOCKED_QUESTIONS);
-    setLoading(false);
-    setStep(2);
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('difficulty', config.difficulty);
+      formData.append('count', config.count);
+      formData.append('mcq', config.types.mcq);
+      formData.append('short', config.types.short);
+      formData.append('long', config.types.long);
+
+      const response = await fetch('http://localhost:8000/generate', {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to generate questions');
+      }
+
+      const data = await response.json();
+      setQuestions(data);
+      setStep(2);
+    } catch (error) {
+      console.error("Error:", error);
+      alert("Failed to generate questions. Ensure backend is running on port 8000.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleTypeToggle = (typeId) => {
