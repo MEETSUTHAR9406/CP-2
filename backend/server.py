@@ -31,7 +31,7 @@ summarizer_model = None
 
 @app.on_event("startup")
 async def startup_event():
-    global generator, mcq_engine
+    global generator, mcq_engine, summarizer_model
     print("Loading models...")
     try:
         generator = QuestionGenerator()
