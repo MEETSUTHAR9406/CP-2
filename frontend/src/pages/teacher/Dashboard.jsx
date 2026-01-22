@@ -122,7 +122,7 @@ const TeacherDashboard = () => {
           </div>
         </div>
         
-        <div className="overflow-x-auto">
+        <div className="overflow-x-auto hidden xl:block">
           <table className="w-full text-left border-collapse">
             <thead>
               <tr className="bg-gray-50/50 text-xs font-semibold text-gray-500 uppercase tracking-wider border-b border-gray-100">
@@ -161,6 +161,43 @@ const TeacherDashboard = () => {
               ))}
             </tbody>
           </table>
+        </div>
+
+        {/* Mobile Card View */}
+        <div className="xl:hidden">
+          {[1, 2, 3].map((item) => (
+            <div key={item} className="p-4 border-b border-gray-100 last:border-b-0 space-y-3">
+              <div className="flex justify-between items-start">
+                <div>
+                  <h3 className="font-semibold text-gray-900 text-sm">Introduction to React Patterns</h3>
+                  <div className="text-xs text-gray-400 font-mono mt-0.5">ID: EX-2025-00{item}</div>
+                </div>
+                <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                  Active
+                </span>
+              </div>
+              
+              <div className="grid grid-cols-2 gap-2 text-sm text-gray-500">
+                <div className="flex flex-col">
+                  <span className="text-xs text-gray-400 uppercase tracking-wider">Created</span>
+                  <span>Jan 1{8+item}, 2026</span>
+                </div>
+                <div className="flex flex-col">
+                   <span className="text-xs text-gray-400 uppercase tracking-wider">Submissions</span>
+                   <span>24/48 Students</span>
+                </div>
+              </div>
+
+              <div className="pt-2 flex gap-2">
+                <button className="flex-1 flex items-center justify-center gap-2 py-2 text-sm font-medium text-[hsl(var(--color-primary))] bg-indigo-50 rounded-lg hover:bg-indigo-100 transition-colors">
+                  <Download size={16} /> Results
+                </button>
+                <button className="p-2 text-gray-400 bg-gray-50 rounded-lg hover:bg-gray-100">
+                  <MoreHorizontal size={18} />
+                </button>
+              </div>
+            </div>
+          ))}
         </div>
         
         <div className="p-4 border-t border-gray-100 text-center">
