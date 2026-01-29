@@ -37,3 +37,4 @@ pnpm-debug.log*
 .vscode/ 
 .idea/
 *.db
+/backend/check_mongo.py

@@ -1,14 +1,47 @@
-from sqlalchemy import Column, Integer, String, Text, DateTime, JSON
+from pydantic import BaseModel, EmailStr, Field
 from datetime import datetime
-from database import Base
+from typing import Optional, List, Any
 
-class Question(Base):
-    __tablename__ = "questions"
+# Auth Models
+class UserCreate(BaseModel):
+    name: str
+    email: EmailStr
+    password: str
+    role: str = "student"
 
-    id = Column(Integer, primary_key=True, index=True)
-    text = Column(Text, nullable=False)
-    type = Column(String, index=True) # 'mcq' or 'qa'
-    options = Column(JSON, nullable=True) # For MCQ options
-    answer = Column(Text, nullable=True) # Correct answer or answer text
-    context = Column(Text, nullable=True) # The chunk of text used to generate strictly
-    created_at = Column(DateTime, default=datetime.utcnow)
+class UserLogin(BaseModel):
+    email: EmailStr
+    password: str
+
+class UserInDB(BaseModel):
+    name: str
+    email: str
+    hashed_password: str
+    role: str
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+
+class Token(BaseModel):
+    access_token: str
+    token_type: str
+    user_name: str
+    user_role: str
+    
+class TokenData(BaseModel):
+    email: Optional[str] = None
+
+# Question Models (for API response/validation)
+class QuestionBase(BaseModel):
+    text: str
+    type: str # 'mcq' or 'qa'
+    options: Optional[List[str]] = None
+    answer: Optional[str] = None
+    context: Optional[str] = None
+
+class QuestionCreate(QuestionBase):
+    pass
+
+class Question(QuestionBase):
+    id: Optional[str] = None # MongoDB ID is string
+    
+    class Config:
+        arbitrary_types_allowed = True

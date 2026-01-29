@@ -7,4 +7,7 @@ fastapi
 uvicorn
 python-multipart
 pypdf
-sqlalchemy
+motor
+passlib[bcrypt]
+python-jose[cryptography]
+pydantic[email]
