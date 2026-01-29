@@ -1,8 +1,7 @@
-from fastapi import FastAPI, UploadFile, File, Form, HTTPException, Depends
+from fastapi import FastAPI, UploadFile, File, Form, HTTPException, Depends, status
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from typing import List, Optional
-from sqlalchemy.orm import Session
 import shutil
 import os
 import tempfile
@@ -14,16 +13,14 @@ import random
 import io
 import pypdf
 import models
-from database import engine, SessionLocal
+from database import db
+from auth import get_password_hash, verify_password, create_access_token, ACCESS_TOKEN_EXPIRE_MINUTES
+from datetime import timedelta
+import logging
 
-models.Base.metadata.create_all(bind=engine)
-
-def get_db():
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
+# Configure logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 app = FastAPI()
 
@@ -53,12 +50,78 @@ async def startup_event():
     except Exception as e:
         print(f"Error loading models: {e}")
 
+# AUTH ENDPOINTS
+
+@app.post("/api/signup", response_model=models.Token)
+async def signup(user: models.UserCreate):
+    # Check if user already exists
+    existing_user = await db.users.find_one({"email": user.email})
+    if existing_user:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Email already registered",
+        )
+    
+    # Hash password and create user
+    hashed_password = get_password_hash(user.password)
+    user_in_db = models.UserInDB(
+        name=user.name,
+        email=user.email,
+        hashed_password=hashed_password,
+        role=user.role
+    )
+    
+    result = await db.users.insert_one(user_in_db.dict())
+    
+    # Create access token
+    access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+    access_token = create_access_token(
+        data={"sub": user.email, "role": user.role}, expires_delta=access_token_expires
+    )
+    
+    return {
+        "access_token": access_token, 
+        "token_type": "bearer",
+        "user_name": user.name,
+        "user_role": user.role
+    }
+
+@app.post("/api/token", response_model=models.Token)
+async def login(user_data: models.UserLogin):
+    user = await db.users.find_one({"email": user_data.email})
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Incorrect email or password",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+        
+    if not verify_password(user_data.password, user["hashed_password"]):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Incorrect email or password",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+    
+    access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+    access_token = create_access_token(
+        data={"sub": user["email"], "role": user["role"]}, expires_delta=access_token_expires
+    )
+    
+    return {
+        "access_token": access_token, 
+        "token_type": "bearer",
+        "user_name": user["name"],
+        "user_role": user["role"]
+    }
+
+# GENERATION ENDPOINTS
+
 @app.post("/api/generate")
 async def generate_questions(
     file: UploadFile = File(...),
     num_questions: int = Form(5),
     mode: str = Form('mcq'),
-    db: Session = Depends(get_db)
 ):
     if not generator or not mcq_engine:
          raise HTTPException(status_code=503, detail="Models are not loaded yet.")
@@ -100,19 +163,17 @@ async def generate_questions(
     processed_chunks = chunks[:3] 
     
     results = []
-
+    
+    # Generate questions
     for i, chunk in enumerate(processed_chunks):
         if mode == 'qa':
             questions = generator.generate(chunk, num_questions=num_questions)
             for q in questions:
-                results.append({"type": "qa", "question": q, "context": chunk})
-                # Save to DB
-                db_question = models.Question(
-                    text=q,
-                    type="qa",
-                    context=chunk
-                )
-                db.add(db_question)
+                q_data = {"type": "qa", "text": q, "context": chunk}
+                results.append(q_data)
+                # Save to MongoDB
+                await db.questions.insert_one(q_data)
+                
         elif mode == 'mcq':
             answers = mcq_engine.get_candidate_answers(chunk, num_candidates=num_questions * 3)
             seen_questions = []
@@ -139,25 +200,25 @@ async def generate_questions(
                 options = distractors + [ans]
                 random.shuffle(options)
                 
-                results.append({
+                q_data = {
                     "type": "mcq",
-                    "question": question,
+                    "text": question,
                     "options": options,
                     "answer": ans,
                     "context": chunk
-                })
+                }
+                results.append(q_data)
+                
+                # Save to MongoDB
+                await db.questions.insert_one(q_data)
 
-                # Save to DB
-                db_question = models.Question(
-                    text=question,
-                    type="mcq",
-                    options=options,
-                    answer=ans,
-                    context=chunk
-                )
-                db.add(db_question)
+    # Convert ObjectId to string for JSON serialization if needed, or just return results
+    # results already dicts without _id if we defined them before insert_one adds it?
+    # insert_one adds _id to the dict in place.
+    for r in results:
+        if '_id' in r:
+            del r['_id']
 
-    db.commit()
     return {"results": results}
 
 @app.post("/api/summarize")

@@ -8,43 +8,91 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
+  // Backend URL
+  const API_URL = 'http://localhost:8000/api';
+
   useEffect(() => {
-    // Mock session check
-    const storedUser = localStorage.getItem('mock_user');
-    if (storedUser) {
-      setUser(JSON.parse(storedUser));
+    // Check for token and restore session
+    const checkSession = async () => {
+        const token = localStorage.getItem('access_token');
+        const userData = localStorage.getItem('user_data');
+        
+        if (token && userData) {
+            setUser(JSON.parse(userData));
+        }
+        setLoading(false);
     }
-    setLoading(false);
+    checkSession();
   }, []);
 
-  const login = (email, password) => {
-    // Mock login logic with specific credentials
-    if ((email === 'student@test.com' && password === 'password') || 
-        (email === 'teacher@test.com' && password === 'password')) {
-      const role = email.includes('teacher') ? 'teacher' : 'student';
-      const newUser = { 
-        name: role === 'teacher' ? 'Teacher User' : 'Student User', 
-        email, 
-        role 
-      };
-      setUser(newUser);
-      localStorage.setItem('user', JSON.stringify(newUser));
-      return;
+  const login = async (email, password) => {
+    try {
+        const response = await fetch(`${API_URL}/token`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ email, password }),
+        });
+
+        if (!response.ok) {
+            const error = await response.json();
+            throw new Error(error.detail || 'Login failed');
+        }
+
+        const data = await response.json();
+        const userData = {
+            name: data.user_name,
+            email: email, // or data.email if returned
+            role: data.user_role
+        };
+
+        localStorage.setItem('access_token', data.access_token);
+        localStorage.setItem('user_data', JSON.stringify(userData));
+        setUser(userData);
+        return true;
+    } catch (error) {
+        console.error("Login Error:", error);
+        throw error;
     }
-    throw new Error('Invalid credentials');
   };
 
-  const signup = (details) => {
-    // Mock simulation
-    const newUser = { ...details, name: details.email.split('@')[0] };
-    setUser(newUser);
-    localStorage.setItem('mock_user', JSON.stringify(newUser));
-    return true;
+  const signup = async (details) => {
+    try {
+        const response = await fetch(`${API_URL}/signup`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(details),
+        });
+
+        if (!response.ok) {
+            const error = await response.json();
+            throw new Error(error.detail || 'Signup failed');
+        }
+
+        const data = await response.json();
+        const userData = {
+            name: data.user_name,
+            email: details.email,
+            role: data.user_role
+        };
+
+        localStorage.setItem('access_token', data.access_token);
+        localStorage.setItem('user_data', JSON.stringify(userData));
+        setUser(userData);
+        return true;
+    } catch (error) {
+        console.error("Signup Error:", error);
+        throw error;
+    }
   };
 
   const logout = () => {
     setUser(null);
-    localStorage.removeItem('mock_user');
+    localStorage.removeItem('access_token');
+    localStorage.removeItem('user_data');
   };
 
   return (
