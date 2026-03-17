@@ -13,6 +13,7 @@ import Summarizer from './pages/student/Summarizer';
 import Flashcards from './pages/student/Flashcards';
 import MCQPractice from './pages/student/MCQPractice';
 import ExamAttempt from './pages/student/ExamAttempt';
+import KnowledgeMap from './pages/student/KnowledgeMap';
 
 import SlidesGenerator from './pages/teacher/SlidesGenerator';
 import ExamGenerator from './pages/teacher/ExamGenerator';
@@ -20,15 +21,15 @@ import Profile from './pages/Profile';
 
 const PrivateRoute = ({ children, allowedRoles }) => {
   const { user, loading } = useAuth();
-  
+
   if (loading) return <div className="center-screen">Loading...</div>;
-  
+
   if (!user) return <Navigate to="/login" />;
-  
+
   if (allowedRoles && !allowedRoles.includes(user.role)) {
-    return <Navigate to="/" replace />; 
+    return <Navigate to="/" replace />;
   }
-  
+
   return children ? children : <Outlet />;
 };
 
@@ -40,21 +41,22 @@ function App() {
           <Routes>
             <Route path="/login" element={<Login />} />
             <Route path="/signup" element={<Signup />} />
-            
+
             <Route path="/" element={<Navigate to="/login" replace />} />
 
             {/* Shared Authenticated Routes */}
             <Route element={<PrivateRoute allowedRoles={['student', 'teacher']}><Layout /></PrivateRoute>}>
-               <Route path="/profile" element={<Profile />} />
-               <Route path="/student/summarizer" element={<Summarizer />} />
-               <Route path="/student/flashcards" element={<Flashcards />} />
-               <Route path="/student/mcq" element={<MCQPractice />} />
-               <Route path="/student/exam" element={<ExamAttempt />} />
+              <Route path="/profile" element={<Profile />} />
+              <Route path="/student/summarizer" element={<Summarizer />} />
+              <Route path="/student/flashcards" element={<Flashcards />} />
+              <Route path="/student/mcq" element={<MCQPractice />} />
+              <Route path="/student/exam" element={<ExamAttempt />} />
             </Route>
 
             {/* Student Routes */}
             <Route element={<PrivateRoute allowedRoles={['student']}><Layout /></PrivateRoute>}>
               <Route path="/student/dashboard" element={<StudentDashboard />} />
+              <Route path="/student/knowledge-map" element={<KnowledgeMap />} />
             </Route>
 
             {/* Teacher Routes */}

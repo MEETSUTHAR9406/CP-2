@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
-import { generateQuestions } from '../../services/api';
+import { generateQuestions, createExam } from '../../services/api';
 import Button from '../../components/UI/Button';
 import Card from '../../components/UI/Card';
-import { UploadCloud, Edit2, RefreshCw, Trash2, CheckCircle, Save, ArrowRight, Layout, Type } from 'lucide-react';
+import { UploadCloud, Edit2, RefreshCw, Trash2, CheckCircle, Save, ArrowRight, Layout, Type, Youtube } from 'lucide-react';
 import clsx from 'clsx';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -25,6 +25,7 @@ const QUESTION_TYPES = [
 const ExamGenerator = () => {
   const [step, setStep] = useState(1); // 1: Setup, 2: Editor, 3: Preview/Publish
   const [file, setFile] = useState(null);
+  const [youtubeUrl, setYoutubeUrl] = useState('');
   const [config, setConfig] = useState({
     difficulty: 'medium',
     types: { mcq: true, short: true, long: false },
@@ -37,8 +38,8 @@ const ExamGenerator = () => {
   const [editValue, setEditValue] = useState('');
 
   const handleGenerate = async () => {
-    if (!file) {
-      alert("Please upload a file");
+    if (!file && !youtubeUrl) {
+      alert("Please upload a file or provide a YouTube link");
       return;
     }
 
@@ -48,13 +49,13 @@ const ExamGenerator = () => {
       // Future improvement: Support mixed modes by making parallel requests
       const mode = config.types.mcq ? 'mcq' : 'qa';
 
-      const data = await generateQuestions(file, config.count, mode);
+      const data = await generateQuestions(file, config.count, mode, youtubeUrl);
       console.log("API Response Data:", data);
 
       const formattedQuestions = data.results.map((item, index) => {
         const baseQuestion = {
           id: index + 1,
-          question: item.question,
+          question: item.text,
           type: item.type === 'mcq' ? 'mcq' : 'short', // Mapping 'qa' to 'short'
         };
 
@@ -97,19 +98,35 @@ const ExamGenerator = () => {
     setEditingId(null);
   };
 
-  const handlePublish = () => {
+  const handlePublish = async () => {
     setLoading(true);
-    setTimeout(() => {
-      const generatedId = `EX-${Math.floor(1000 + Math.random() * 9000)}-2026`;
+    try {
+      const examData = {
+        title: 'AI Generated Exam',
+        description: 'Generated from uploaded material',
+        questions: questions,
+        duration: questions.length * 2, // 2 mins per question
+        created_by: 'teacher'
+      };
+      
+      const response = await createExam(examData);
+      setExamId(response.id);
+      
+      // Keep local copy just as backup
       localStorage.setItem('qq_published_exam', JSON.stringify({
-        id: generatedId,
+        id: response.id,
         questions,
-        title: 'Generated Exam'
+        title: 'AI Generated Exam',
+        duration: questions.length * 2
       }));
-      setExamId(generatedId);
-      setLoading(false);
+
       setStep(3);
-    }, 1500);
+    } catch(err) {
+      console.error("Failed to publish exam", err);
+      alert("Error publishing exam to database.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   const deleteQuestion = (id) => {
@@ -134,17 +151,41 @@ const ExamGenerator = () => {
                 <UploadCloud size={32} />
               </div>
               {file ? (
-                <div className="animate-fade-in">
+                <div className="animate-fade-in relative z-10">
                   <span className="text-[hsl(var(--color-primary))] font-bold text-lg">{file.name}</span>
                   <p className="text-xs text-gray-400 mt-1">Ready for analysis</p>
+                  <button onClick={(e) => { e.stopPropagation(); setFile(null); }} className="mt-2 text-red-500 text-sm hover:underline">Remove File</button>
                 </div>
               ) : (
                 <>
                   <span className="text-gray-600 font-medium text-lg block mb-1">Upload PDF Chapter or Notes</span>
-                  <span className="text-gray-400 text-sm">Drag & drop or click to browse</span>
+                  <span className="text-gray-400 text-sm block mb-4">Drag & drop or click to browse</span>
+                  <input type="file" disabled={!!youtubeUrl} className={clsx("absolute inset-0 opacity-0 cursor-pointer", !!youtubeUrl && "cursor-not-allowed")} onChange={(e) => setFile(e.target.files[0])} accept=".pdf" />
                 </>
               )}
-              <input type="file" className="absolute inset-0 opacity-0 cursor-pointer" onChange={(e) => setFile(e.target.files[0])} accept=".pdf" />
+            </div>
+
+            <div className="flex items-center gap-4 my-2">
+              <div className="h-px bg-gray-200 flex-1"></div>
+              <span className="text-sm text-gray-400 font-medium uppercase tracking-widest">OR</span>
+              <div className="h-px bg-gray-200 flex-1"></div>
+            </div>
+
+            <div className="relative">
+              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <Youtube className="h-5 w-5 text-gray-400" />
+              </div>
+              <input
+                type="url"
+                disabled={!!file}
+                className={clsx(
+                  "block w-full pl-10 pr-3 py-3 border-2 border-gray-200 rounded-xl leading-5 bg-white placeholder-gray-400 focus:outline-none focus:bg-white focus:border-[hsl(var(--color-primary))] sm:text-sm transition-colors",
+                  !!file && "bg-gray-50 cursor-not-allowed opacity-60"
+                )}
+                placeholder="Paste a YouTube Lecture Link (e.g., https://youtube.com/watch?v=...)"
+                value={youtubeUrl}
+                onChange={(e) => setYoutubeUrl(e.target.value)}
+              />
             </div>
           </div>
 
@@ -195,7 +236,7 @@ const ExamGenerator = () => {
           </div>
 
           <div className="pt-6 border-t border-gray-100">
-            <Button size="lg" className="w-full text-lg shadow-lg shadow-indigo-200" onClick={handleGenerate} loading={loading} disabled={!file && !config.difficulty}>
+            <Button size="lg" className="w-full text-lg shadow-lg shadow-indigo-200" onClick={handleGenerate} loading={loading} disabled={(!file && !youtubeUrl) || !config.difficulty}>
               Generate Exam Draft
               <ArrowRight size={20} className="ml-2" />
             </Button>

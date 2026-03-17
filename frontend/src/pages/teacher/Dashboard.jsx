@@ -1,13 +1,32 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Card from '../../components/UI/Card';
 import Button from '../../components/UI/Button';
 import { Users, FileText, Download, TrendingUp, Plus, Search, MoreHorizontal, BookOpen, Presentation, PenTool, LayoutDashboard } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
+import { getExams } from '../../services/api';
 
 const TeacherDashboard = () => {
   const [searchTerm, setSearchTerm] = useState('');
+  const [exams, setExams] = useState([]);
   const { user } = useAuth();
+
+  useEffect(() => {
+    const fetchExams = async () => {
+      try {
+        const data = await getExams();
+        if (data && data.length) {
+            setExams(data);
+        }
+      } catch (err) {
+        console.error("Failed to fetch exams:", err);
+      }
+    };
+    fetchExams();
+  }, []);
+
+  // Filter exams for search
+  const filteredExams = exams.filter(e => e.title && e.title.toLowerCase().includes(searchTerm.toLowerCase()));
 
   return (
     <div className="space-y-8">
@@ -43,8 +62,8 @@ const TeacherDashboard = () => {
              <div className="p-2 bg-teal-100 text-teal-600 rounded-lg flex-shrink-0"><FileText size={24} /></div>
              <span className="text-sm font-bold text-gray-500 break-words">Active Exams</span>
            </div>
-           <div className="text-3xl font-bold text-gray-900">3</div>
-           <div className="text-xs text-gray-400 mt-1">Next due: Friday</div>
+           <div className="text-3xl font-bold text-gray-900">{exams.length}</div>
+           <div className="text-xs text-gray-400 mt-1">Recently created</div>
         </Card>
 
         <Card className="p-6 border-none shadow-sm hover:translate-y-1 transition-all">
@@ -127,20 +146,20 @@ const TeacherDashboard = () => {
             <thead>
               <tr className="bg-gray-50/50 text-xs font-semibold text-gray-500 uppercase tracking-wider border-b border-gray-100">
                 <th className="px-6 py-4">Topic / ID</th>
-                <th className="px-6 py-4">Created Date</th>
+                <th className="px-6 py-4">Questions</th>
                 <th className="px-6 py-4">Status</th>
                 <th className="px-6 py-4">Submission</th>
                 <th className="px-6 py-4 text-right">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-50">
-              {[1, 2, 3].map((item) => (
-                <tr key={item} className="hover:bg-gray-50 transition-colors group">
+              {filteredExams.length > 0 ? filteredExams.map((item) => (
+                <tr key={item.id} className="hover:bg-gray-50 transition-colors group">
                   <td className="px-6 py-4">
-                    <div className="font-medium text-gray-900">Introduction to React Patterns</div>
-                    <div className="text-xs text-gray-400 font-mono mt-0.5">ID: EX-2025-00{item}</div>
+                    <div className="font-medium text-gray-900">{item.title}</div>
+                    <div className="text-xs text-gray-400 font-mono mt-0.5">ID: {item.id}</div>
                   </td>
-                  <td className="px-6 py-4 text-sm text-gray-500">Jan 1{8+item}, 2026</td>
+                  <td className="px-6 py-4 text-sm text-gray-500">{item.questions?.length || 0}</td>
                   <td className="px-6 py-4">
                     <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
                       Active
@@ -158,19 +177,23 @@ const TeacherDashboard = () => {
                     </div>
                   </td>
                 </tr>
-              ))}
+              )) : (
+                  <tr>
+                      <td colSpan="5" className="px-6 py-8 text-center text-gray-500">No exams generated yet. Click 'New Exam' to create one.</td>
+                  </tr>
+              )}
             </tbody>
           </table>
         </div>
 
         {/* Mobile Card View */}
         <div className="xl:hidden">
-          {[1, 2, 3].map((item) => (
-            <div key={item} className="p-4 border-b border-gray-100 last:border-b-0 space-y-3">
+          {filteredExams.length > 0 ? filteredExams.map((item) => (
+            <div key={item.id} className="p-4 border-b border-gray-100 last:border-b-0 space-y-3">
               <div className="flex justify-between items-start">
                 <div>
-                  <h3 className="font-semibold text-gray-900 text-sm">Introduction to React Patterns</h3>
-                  <div className="text-xs text-gray-400 font-mono mt-0.5">ID: EX-2025-00{item}</div>
+                  <h3 className="font-semibold text-gray-900 text-sm">{item.title}</h3>
+                  <div className="text-xs text-gray-400 font-mono mt-0.5">ID: {item.id}</div>
                 </div>
                 <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
                   Active
@@ -179,8 +202,8 @@ const TeacherDashboard = () => {
               
               <div className="grid grid-cols-2 gap-2 text-sm text-gray-500">
                 <div className="flex flex-col">
-                  <span className="text-xs text-gray-400 uppercase tracking-wider">Created</span>
-                  <span>Jan 1{8+item}, 2026</span>
+                  <span className="text-xs text-gray-400 uppercase tracking-wider">Questions</span>
+                  <span>{item.questions?.length || 0}</span>
                 </div>
                 <div className="flex flex-col">
                    <span className="text-xs text-gray-400 uppercase tracking-wider">Submissions</span>
@@ -197,7 +220,9 @@ const TeacherDashboard = () => {
                 </button>
               </div>
             </div>
-          ))}
+          )) : (
+             <div className="p-8 text-center text-gray-500">No exams generated yet. Click 'New Exam' to create one.</div>
+          )}
         </div>
         
         <div className="p-4 border-t border-gray-100 text-center">

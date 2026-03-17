@@ -1,10 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Button from '../../components/UI/Button';
 import Card from '../../components/UI/Card';
 import { ChevronLeft, ChevronRight, Bookmark, Sparkles, RotateCcw } from 'lucide-react';
 import clsx from 'clsx';
 import { useStats } from '../../context/StatsContext';
+import { getQuestions } from '../../services/api';
 
 const MOCK_CARDS = [
   { id: 1, front: "What is React's Virtual DOM?", back: "A lightweight copy of the real DOM that React uses to optimize updates." },
@@ -13,7 +14,8 @@ const MOCK_CARDS = [
 ];
 
 const Flashcards = () => {
-  const [cards, setCards] = useState(MOCK_CARDS);
+  const [cards, setCards] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isFlipped, setIsFlipped] = useState(false);
   
@@ -23,6 +25,35 @@ const Flashcards = () => {
      const statsCtx = useStats();
      if (statsCtx) awardXP = statsCtx.awardXP;
    } catch (e) { console.warn("StatsContext missing"); }
+
+  useEffect(() => {
+    const fetchCards = async () => {
+      try {
+        const data = await getQuestions('qa'); // fetch QA questions
+        if (data && data.length > 0) {
+            const formatted = data.map((q, i) => ({
+               id: q.id || i,
+               front: q.text,
+               back: q.answer || q.context || "Check your study material for this concept."
+            }));
+            // Shuffle for better learning experience
+            setCards(formatted.sort(() => 0.5 - Math.random()));
+        } else {
+            console.log("No QA pairs in DB, showing mock data");
+            setCards(MOCK_CARDS); 
+        }
+      } catch (err) {
+        console.error("Failed to load flashcards", err);
+        setCards(MOCK_CARDS);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchCards();
+  }, []);
+
+  if (isLoading) return <div className="text-center py-20 text-gray-500">Loading flashcards from database...</div>;
+  if (cards.length === 0) return <div className="text-center py-20 text-gray-500">No flashcards available in the database yet.</div>;
 
   const currentCard = cards[currentIndex];
 

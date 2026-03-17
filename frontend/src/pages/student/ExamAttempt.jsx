@@ -3,6 +3,7 @@ import Button from '../../components/UI/Button';
 import Input from '../../components/UI/Input';
 import Card from '../../components/UI/Card';
 import { Clock, FileText, CheckCircle, AlertCircle, ArrowRight, Timer } from 'lucide-react';
+import { getExam } from '../../services/api';
 import clsx from 'clsx';
 import { useStats } from '../../context/StatsContext';
 
@@ -43,16 +44,16 @@ const ExamAttempt = () => {
     return () => clearInterval(timer);
   }, [timeLeft, status]);
 
-  const handleFetchExam = () => {
+  const handleFetchExam = async () => {
     if (!examId.trim()) return;
-    const trimmed = examId.trim().toUpperCase();
+    const trimmed = examId.trim();
     
     // Check local published exam
     const stored = localStorage.getItem('qq_published_exam');
     if (stored) {
       try {
         const parsed = JSON.parse(stored);
-        if (parsed.id === trimmed) {
+        if (parsed.id === trimmed.toUpperCase()) {
           setExam(parsed);
           setTimeLeft((parsed.duration || 45) * 60);
           setStatus('taking');
@@ -62,13 +63,24 @@ const ExamAttempt = () => {
       } catch (e) {}
     }
 
-    if (trimmed === 'DEMO' || trimmed === MOCK_EXAM.id) {
-      setExam(MOCK_EXAM);
-      setTimeLeft(MOCK_EXAM.duration * 60);
-      setStatus('taking');
-      setAnswers({});
-    } else {
-      alert("Exam not found. Try 'DEMO' or an ID from your teacher.");
+    try {
+      const data = await getExam(trimmed);
+      if (data) {
+        setExam(data);
+        setTimeLeft((data.duration || 45) * 60);
+        setStatus('taking');
+        setAnswers({});
+        return;
+      }
+    } catch (err) {
+      if (trimmed.toUpperCase() === 'DEMO' || trimmed.toUpperCase() === MOCK_EXAM.id) {
+        setExam(MOCK_EXAM);
+        setTimeLeft(MOCK_EXAM.duration * 60);
+        setStatus('taking');
+        setAnswers({});
+      } else {
+        alert("Exam not found. Check the ID and try again, or use 'DEMO'.");
+      }
     }
   };
 

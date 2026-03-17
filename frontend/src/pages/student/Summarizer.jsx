@@ -8,8 +8,9 @@ import { useStats } from '../../context/StatsContext';
 import clsx from 'clsx';
 
 const Summarizer = () => {
-  const [activeTab, setActiveTab] = useState('text'); // 'text' | 'pdf'
+  const [activeTab, setActiveTab] = useState('text'); // 'text' | 'pdf' | 'youtube'
   const [inputText, setInputText] = useState('');
+  const [youtubeUrl, setYoutubeUrl] = useState('');
   const [file, setFile] = useState(null);
   const [summary, setSummary] = useState('');
   const [loading, setLoading] = useState(false);
@@ -26,7 +27,7 @@ const Summarizer = () => {
   }
 
   const handleGenerate = async () => {
-    if (!inputText && !file) return;
+    if (!inputText && !file && !youtubeUrl) return;
     setLoading(true);
     setSummary('');
 
@@ -36,6 +37,8 @@ const Summarizer = () => {
         const formData = new FormData();
         formData.append('file', file);
         payload = formData;
+      } else if (activeTab === 'youtube' && youtubeUrl) {
+        payload = { youtube_url: youtubeUrl };
       } else {
         payload = { text: inputText };
       }
@@ -69,7 +72,7 @@ const Summarizer = () => {
       {/* Header */}
       <div>
         <h1 className="text-3xl font-bold text-gray-900">AI Summarizer</h1>
-        <p className="text-gray-500 mt-1">Transform long documents into concise insights in seconds.</p>
+        <p className="text-gray-500 mt-1">Transform long documents and video lectures into concise insights.</p>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
@@ -77,24 +80,33 @@ const Summarizer = () => {
         {/* Input Section */}
         <div className="space-y-4">
           {/* Tabs */}
-          <div className="bg-gray-100 p-1 rounded-xl inline-flex w-full">
+          <div className="bg-gray-100 p-1 rounded-xl flex w-full overflow-x-auto">
             <button
               onClick={() => setActiveTab('text')}
               className={clsx(
-                "flex-1 py-2.5 px-4 rounded-lg text-sm font-medium transition-all flex items-center justify-center gap-2",
+                "flex-1 py-2.5 px-4 rounded-lg text-sm font-medium transition-all flex items-center justify-center gap-2 whitespace-nowrap",
                 activeTab === 'text' ? "bg-white text-gray-900 shadow-sm" : "text-gray-500 hover:text-gray-700"
               )}
             >
-              <AlignLeft size={18} /> Text Input
+              <AlignLeft size={18} /> Text
             </button>
             <button
               onClick={() => setActiveTab('pdf')}
               className={clsx(
-                "flex-1 py-2.5 px-4 rounded-lg text-sm font-medium transition-all flex items-center justify-center gap-2",
+                "flex-1 py-2.5 px-4 rounded-lg text-sm font-medium transition-all flex items-center justify-center gap-2 whitespace-nowrap",
                 activeTab === 'pdf' ? "bg-white text-gray-900 shadow-sm" : "text-gray-500 hover:text-gray-700"
               )}
             >
-              <FileType size={18} /> Upload PDF
+              <FileType size={18} /> PDF
+            </button>
+            <button
+              onClick={() => setActiveTab('youtube')}
+              className={clsx(
+                "flex-1 py-2.5 px-4 rounded-lg text-sm font-medium transition-all flex items-center justify-center gap-2 whitespace-nowrap",
+                activeTab === 'youtube' ? "bg-white text-gray-900 shadow-sm" : "text-gray-500 hover:text-gray-700"
+              )}
+            >
+              <Sparkles size={18} className="text-red-500" /> YouTube
             </button>
           </div>
 
@@ -106,7 +118,7 @@ const Summarizer = () => {
                 value={inputText}
                 onChange={(e) => setInputText(e.target.value)}
               />
-            ) : (
+            ) : activeTab === 'pdf' ? (
               <div className="flex-1 border-2 border-dashed border-gray-300 rounded-xl flex flex-col items-center justify-center p-8 hover:bg-gray-50 hover:border-[hsl(var(--color-primary))] transition-all cursor-pointer group relative">
                 <div className="w-16 h-16 bg-blue-50 rounded-full flex items-center justify-center mb-4 text-blue-500 group-hover:scale-110 transition-transform">
                   <UploadCloud size={32} />
@@ -130,17 +142,34 @@ const Summarizer = () => {
                 )}
                 <input type="file" className="absolute inset-0 opacity-0 cursor-pointer" onChange={(e) => setFile(e.target.files[0])} accept=".pdf,.docx,.txt" />
               </div>
+            ) : (
+                <div className="flex-1 flex flex-col items-center justify-center p-8 space-y-6">
+                    <div className="w-16 h-16 bg-red-50 rounded-full flex items-center justify-center text-red-500">
+                      <Sparkles size={32} />
+                    </div>
+                    <div className="w-full space-y-2">
+                        <label className="text-sm font-bold text-gray-700">YouTube Video URL</label>
+                        <input 
+                            type="url" 
+                            className="w-full p-4 bg-gray-50 rounded-xl border-2 border-gray-100 focus:border-red-500 focus:ring-0 outline-none transition-all" 
+                            placeholder="https://www.youtube.com/watch?v=..."
+                            value={youtubeUrl}
+                            onChange={(e) => setYoutubeUrl(e.target.value)}
+                        />
+                        <p className="text-xs text-gray-400 text-center mt-2 italic">AI will automatically fetch the transcript and generate a summary.</p>
+                    </div>
+                </div>
             )}
 
             <div className="mt-6 flex justify-end">
               <Button
                 onClick={handleGenerate}
                 loading={loading}
-                disabled={(!inputText && !file) || loading}
+                disabled={(!inputText && !file && !youtubeUrl) || loading}
                 className="w-full md:w-auto px-8"
               >
                 <Sparkles size={18} className="mr-2" />
-                Generate Summary
+                Generate Insight
               </Button>
             </div>
           </Card>

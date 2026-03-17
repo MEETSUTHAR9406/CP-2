@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
-import { generateQuestions } from '../../services/api';
+import { generateQuestions, getTutorHint, getQuestions } from '../../services/api';
 import Card from '../../components/UI/Card';
 import Button from '../../components/UI/Button';
-import { UploadCloud, CheckCircle, XCircle, Award, ArrowRight, RefreshCcw, BookOpen } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { UploadCloud, CheckCircle, XCircle, Award, ArrowRight, RefreshCcw, BookOpen, Lightbulb } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 import clsx from 'clsx';
 import { useStats } from '../../context/StatsContext';
 
@@ -37,6 +37,10 @@ const MCQPractice = () => {
   const [isAnswered, setIsAnswered] = useState(false);
   const [score, setScore] = useState(0);
 
+  // Tutor State
+  const [tutorHint, setTutorHint] = useState(null);
+  const [isHintLoading, setIsHintLoading] = useState(false);
+
   // Safe stats context usage
   let awardXP = () => { };
   try {
@@ -44,13 +48,35 @@ const MCQPractice = () => {
     if (statsCtx) awardXP = statsCtx.awardXP;
   } catch (e) { console.warn("StatsContext missing"); }
 
-  const startQuiz = () => {
-    setQuestions(MOCK_QUIZ); // Reset to mock quiz for general knowledge
-    setPhase('quiz');
-    setCurrentQuestionIndex(0);
-    setScore(0);
-    setIsAnswered(false);
-    setSelectedOption(null);
+  const startQuiz = async () => {
+    setIsLoading(true);
+    try {
+      const data = await getQuestions('mcq');
+      if (data && data.length > 0) {
+          const formattedQuestions = data.map((item, index) => ({
+             id: item.id || index,
+             question: item.text,
+             options: item.options,
+             correct: item.options.indexOf(item.answer),
+             context: item.context
+          }));
+          // Shuffle and take top 10
+          setQuestions(formattedQuestions.sort(() => 0.5 - Math.random()).slice(0, 10));
+      } else {
+          setQuestions(MOCK_QUIZ);
+      }
+    } catch(err) {
+      console.error(err);
+      setQuestions(MOCK_QUIZ);
+    } finally {
+      setIsLoading(false);
+      setPhase('quiz');
+      setCurrentQuestionIndex(0);
+      setScore(0);
+      setIsAnswered(false);
+      setSelectedOption(null);
+      setTutorHint(null);
+    }
   };
 
   const handleFileUpload = async (event) => {
@@ -64,9 +90,9 @@ const MCQPractice = () => {
       // API returns: { results: [{ type: 'mcq', question, options, answer, context }] }
       const formattedQuestions = data.results.map((item, index) => ({
         id: index,
-        question: item.question,
+        question: item.text, // Use item.text as per backend structure
         options: item.options,
-        correct: item.options.indexOf(item.answer), // Find index of correct answer
+        correct: item.options.indexOf(item.answer), 
         context: item.context
       }));
 
@@ -76,6 +102,7 @@ const MCQPractice = () => {
       setScore(0);
       setIsAnswered(false);
       setSelectedOption(null);
+      setTutorHint(null);
     } catch (error) {
       console.error("Quiz generation failed:", error);
       alert("Failed to generate quiz from file. Please try again.");
@@ -84,13 +111,35 @@ const MCQPractice = () => {
     }
   };
 
-  const handleOptionClick = (index) => {
+  const handleOptionClick = async (index) => {
     if (isAnswered) return;
     setSelectedOption(index);
     setIsAnswered(true);
+    setTutorHint(null); // Clear previous hints if any
 
-    if (index === questions[currentQuestionIndex].correct) {
+    const question = questions[currentQuestionIndex];
+    const isCorrect = index === question.correct;
+
+    if (isCorrect) {
       setScore(s => s + 1);
+    } else {
+      // Wrong answer selected, fetch a socratic hint
+      setIsHintLoading(true);
+      try {
+        const payload = {
+          question_text: question.question || "This question",
+          wrong_answer: question.options[index] || "an incorrect option",
+          correct_answer: question.options[question.correct] || "the correct answer",
+          context: question.context || ""
+        };
+        const response = await getTutorHint(payload);
+        setTutorHint(response.hint);
+      } catch (error) {
+        console.error("Failed to load hint:", error);
+        setTutorHint("Could not fetch a hint at this time.");
+      } finally {
+        setIsHintLoading(false);
+      }
     }
   };
 
@@ -99,6 +148,7 @@ const MCQPractice = () => {
       setCurrentQuestionIndex(prev => prev + 1);
       setIsAnswered(false);
       setSelectedOption(null);
+      setTutorHint(null);
     } else {
       setPhase('result');
       awardXP(score * 10, 'mcq');
@@ -237,6 +287,36 @@ const MCQPractice = () => {
             );
           })}
         </div>
+
+        {/* Tutor Hint UI section */}
+        <AnimatePresence>
+          {(isHintLoading || tutorHint) && (
+            <motion.div
+              initial={{ opacity: 0, height: 0, marginTop: 0 }}
+              animate={{ opacity: 1, height: 'auto', marginTop: 24 }}
+              exit={{ opacity: 0, height: 0, marginTop: 0 }}
+              className="overflow-hidden"
+            >
+              <div className="bg-amber-50 rounded-xl p-5 border border-amber-100 flex gap-4">
+                <div className="w-10 h-10 rounded-full bg-amber-100 flex items-center justify-center flex-shrink-0 text-amber-600">
+                  <Lightbulb size={24} className={isHintLoading ? "animate-pulse" : ""} />
+                </div>
+                <div className="flex-1">
+                  <h4 className="font-bold text-amber-900 mb-1 text-sm uppercase tracking-wide">AI Tutor Hint</h4>
+                  {isHintLoading ? (
+                    <div className="space-y-2 mt-2">
+                      <div className="h-4 bg-amber-200/50 rounded w-3/4 animate-pulse"></div>
+                      <div className="h-4 bg-amber-200/50 rounded w-1/2 animate-pulse"></div>
+                    </div>
+                  ) : (
+                    <p className="text-amber-800 text-sm leading-relaxed font-medium">{tutorHint}</p>
+                  )}
+                </div>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
       </Card>
 
       <div className="flex justify-end">

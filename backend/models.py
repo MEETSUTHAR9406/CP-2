@@ -36,6 +36,9 @@ class QuestionBase(BaseModel):
     options: Optional[List[str]] = None
     answer: Optional[str] = None
     context: Optional[str] = None
+    topic: Optional[str] = None
+    subtopic: Optional[str] = None
+    timestamp: Optional[str] = None
 
 class QuestionCreate(QuestionBase):
     pass
@@ -45,3 +48,18 @@ class Question(QuestionBase):
     
     class Config:
         arbitrary_types_allowed = True
+
+class ExamCreate(BaseModel):
+    title: str
+    description: Optional[str] = None
+    questions: List[Question]
+    duration: int = 30 # defaults to 30 mins
+    created_by: Optional[str] = None
+
+class Exam(ExamCreate):
+    id: str
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+
+class Slide(BaseModel):
+    title: str
+    content: List[str] # bullet points

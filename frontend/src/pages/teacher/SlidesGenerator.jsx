@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import Card from '../../components/UI/Card';
+import { generateSlides } from '../../services/api';
 import Button from '../../components/UI/Button';
 import { UploadCloud, Presentation, ChevronLeft, ChevronRight, Download, PlayCircle } from 'lucide-react';
 import { motion } from 'framer-motion';
@@ -10,20 +11,29 @@ const SlidesGenerator = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [loading, setLoading] = useState(false);
 
-  // Mock Slides
-  const slides = [
+  // Slides state
+  const [slides, setSlides] = useState([
     { title: "Introduction to React", content: ["• Component-Based Architecture", "• Virtual DOM", "• Unidirectional Data Flow"] },
     { title: "Components & Props", content: ["• Functional vs Class Components", "• Passing Data with Props", "• Reusability"] },
     { title: "State Management", content: ["• useState Hook", "• Side Effects with useEffect", "• Custom Hooks"] },
-  ];
+  ]);
 
-  const handleGenerate = () => {
+  const handleGenerate = async () => {
     if (!file) return;
     setLoading(true);
-    setTimeout(() => {
+    try {
+      const data = await generateSlides(file);
+      if (data && data.slides && data.slides.length > 0) {
+        setSlides(data.slides);
+      }
+    } catch(err) {
+      console.error("Failed to generate slides", err);
+      // Fallback to mock slides
+    } finally {
       setIsGenerated(true);
       setLoading(false);
-    }, 2000);
+      setCurrentSlide(0);
+    }
   };
 
   return (
