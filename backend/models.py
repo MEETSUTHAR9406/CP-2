@@ -1,0 +1,65 @@
+from pydantic import BaseModel, EmailStr, Field
+from datetime import datetime
+from typing import Optional, List, Any
+
+# Auth Models
+class UserCreate(BaseModel):
+    name: str
+    email: EmailStr
+    password: str
+    role: str = "student"
+
+class UserLogin(BaseModel):
+    email: EmailStr
+    password: str
+
+class UserInDB(BaseModel):
+    name: str
+    email: str
+    hashed_password: str
+    role: str
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+
+class Token(BaseModel):
+    access_token: str
+    token_type: str
+    user_name: str
+    user_role: str
+    
+class TokenData(BaseModel):
+    email: Optional[str] = None
+
+# Question Models (for API response/validation)
+class QuestionBase(BaseModel):
+    text: str
+    type: str # 'mcq' or 'qa'
+    options: Optional[List[str]] = None
+    answer: Optional[str] = None
+    context: Optional[str] = None
+    topic: Optional[str] = None
+    subtopic: Optional[str] = None
+    timestamp: Optional[str] = None
+
+class QuestionCreate(QuestionBase):
+    pass
+
+class Question(QuestionBase):
+    id: Optional[str] = None # MongoDB ID is string
+    
+    class Config:
+        arbitrary_types_allowed = True
+
+class ExamCreate(BaseModel):
+    title: str
+    description: Optional[str] = None
+    questions: List[Question]
+    duration: int = 30 # defaults to 30 mins
+    created_by: Optional[str] = None
+
+class Exam(ExamCreate):
+    id: str
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+
+class Slide(BaseModel):
+    title: str
+    content: List[str] # bullet points
