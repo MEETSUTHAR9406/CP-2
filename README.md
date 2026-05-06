@@ -13,7 +13,7 @@ Built with the tools and technologies:
 ![FastAPI](https://img.shields.io/badge/FastAPI-teal)
 ![Transformer](https://img.shields.io/badge/Transformer-purple)
 ![SQLAlchemy](https://img.shields.io/badge/SQLAlchemy-red)
-![PostgreSQL](https://img.shields.io/badge/PostgreSQL-blue)
+![MongoDB](https://img.shields.io/badge/MongoDB-%234ea94b.svg?logo=mongodb&logoColor=white)
 ![JavaScript](https://img.shields.io/badge/JavaScript-yellow)
 ![HTML5](https://img.shields.io/badge/HTML5-orange)
 ![CSS3](https://img.shields.io/badge/CSS3-blue)
